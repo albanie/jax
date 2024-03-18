@@ -15,6 +15,7 @@
 import contextlib
 import io
 import logging
+import os
 import platform
 import subprocess
 import sys
@@ -57,6 +58,8 @@ class LoggingTest(jtu.JaxTestCase):
       raise self.skipTest(
           "test requires fresh process on Cloud TPU because only one process "
           "can use the TPU at a time")
+    if xla_bridge._backends and not jtu.is_device_cuda():
+      raise self.skipTest("test requires Hermetic CUDA configured")
     if sys.executable is None:
       raise self.skipTest("test requires access to python binary")
 
@@ -70,9 +73,15 @@ class LoggingTest(jtu.JaxTestCase):
     """)
     python = sys.executable
     assert "python" in python
+    env_variables = {"TF_CPP_MIN_LOG_LEVEL": "1"}
+    if os.getenv("PYTHONPATH"):
+      env_variables["PYTHONPATH"] = os.getenv("PYTHONPATH")
     # Make sure C++ logging is at default level for the test process.
-    proc = subprocess.run([python, "-c", program], capture_output=True,
-                          env={"TF_CPP_MIN_LOG_LEVEL": "1"})
+    proc = subprocess.run(
+        [python, "-c", program],
+        capture_output=True,
+        env=env_variables,
+    )
 
     lines = proc.stdout.split(b"\n")
     lines.extend(proc.stderr.split(b"\n"))
