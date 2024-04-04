@@ -1603,7 +1603,8 @@ class MutableArrayTest(jtu.JaxTestCase):
     out = f()
     self.assertAllClose(out, jnp.array([2., 0., 1.]), check_dtypes=False)
 
-  def test_refs_in_vjps(self):
+  @parameterized.parameters([True, False])
+  def test_refs_in_vjps(self, jit):
     def gradient_history_calculator_fwd(x, ref):
       return x, ref
 
@@ -1639,6 +1640,9 @@ class MutableArrayTest(jtu.JaxTestCase):
 
     def loss(x, y):
       return dot_op.forward(x, y).sum()
+
+    if jit:
+      loss = jax.jit(loss)
 
     for i in range(3):
       jax.grad(loss, (0,1))(x_top, y_top)
