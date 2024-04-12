@@ -181,12 +181,11 @@ def jit(
       if the sharding cannot be inferred.
 
       The valid resource assignment specifications are:
-        - :py:class:`XLACompatibleSharding`, which will decide how the value
-            will be partitioned. With this, using a mesh context manager is not
-            required.
+        - :py:class:`XLACompatibleSharding`, which will decide how the value will 
+          be partitioned. With this, using a mesh context manager is not required.
         - :py:obj:`None`, will give JAX the freedom to choose whatever sharding
           it wants.
-          For in_shardings, JAX will mark is as replicated but this behavior
+          For ``in_shardings``, JAX will mark it as replicated but this behavior
           can change in the future.
           For out_shardings, we will rely on the XLA GSPMD partitioner to
           determine the output shardings.
